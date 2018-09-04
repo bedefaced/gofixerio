@@ -25,13 +25,13 @@ Let's see an exhaustive example with all the parameters:
 ```go
 exchange := fixerio.New()
 
-exchange.Base(fixerio.EUR)
-exchange.Symbols(fixerio.USD, fixerio.AUD)
+exchange.Base(fixerio.EUR.String())
+exchange.Symbols(fixerio.USD.String(), fixerio.AUD.String())
 exchange.Secure(true)
 exchange.Historical(time.Date(2016, time.December, 15, 0, 0, 0, 0, time.UTC))
 
 if rates, err := exchange.GetRates(); err == nil {
-    fmt.Println(rates[fixerio.USD])
+    fmt.Println(rates[fixerio.USD.String()])
 }
 ```
 
@@ -43,7 +43,7 @@ The response is a simple `map[string]float32` with currencies as keys and ratios
 
 ```go
 exchange := fixerio.New()
-exchange.Symbols(fixerio.USD, fixerio.GBP)
+exchange.Symbols(fixerio.USD.String(), fixerio.GBP.String())
 
 rates, _ := exchange.GetRates()
 fmt.Println(rates)
@@ -59,5 +59,5 @@ which you can access with the keys as strings or using the currency constants:
 
 ```go
 rates["USD"];
-rates[fixerio.GBP];
+rates[fixerio.GBP.String()];
 ```
