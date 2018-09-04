@@ -17,11 +17,12 @@ import (
 
 // Request Holds the request parameters.
 type Request struct {
-	base      string
-	protocol  string
-	accessKey string
-	date      string
-	symbols   []string
+	httpClient http.Client
+	base       string
+	protocol   string
+	accessKey  string
+	date       string
+	symbols    []string
 }
 
 // Response JSON response object.
@@ -52,11 +53,18 @@ const baseURL = "data.fixer.io/api"
 // New Initializes fixerio.
 func New() *Request {
 	return &Request{
-		base:      EUR.String(),
-		protocol:  "https",
-		accessKey: "",
-		date:      "",
-		symbols:   make([]string, 0),
+		httpClient: *http.DefaultClient,
+		base:       EUR.String(),
+		protocol:   "https",
+		accessKey:  "",
+		date:       "",
+		symbols:    make([]string, 0),
+	}
+}
+
+func (f *Request) Client(httpClient *http.Client) {
+	if httpClient != nil {
+		f.httpClient = *httpClient
 	}
 }
 
@@ -134,7 +142,7 @@ func (f *Request) GetURL() string {
 
 func (f *Request) makeRequest(url string) (ClientResponse, error) {
 	var response Response
-	body, err := http.Get(url)
+	body, err := f.httpClient.Get(url)
 
 	if err != nil {
 		return ClientResponse{}, errors.New("Couldn't connect to server")
