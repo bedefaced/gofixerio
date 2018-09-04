@@ -52,7 +52,7 @@ const baseURL = "data.fixer.io/api"
 // New Initializes fixerio.
 func New() *Request {
 	return &Request{
-		base:      "EUR",
+		base:      EUR.String(),
 		protocol:  "https",
 		accessKey: "",
 		date:      "",
