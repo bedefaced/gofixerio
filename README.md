@@ -1,63 +1,40 @@
-# Thin wrapper for Fixer.io
+# Downlader of exchange rates from Fixer.io to a mySQL database
 
-A thin wrapper in Go for [Fixer.io](http://www.fixer.io), a service for foreign exchange rates and currency conversion. It provides a few methods to easily construct the url, makes the api call and gives back the response.
+This is an example task for Data Engineers. Based on the (deprecated) library by Fadion
+```
+github.com/fadion/gofixerio/blob/master/fixerio.go
+```
+This program retrieves exchange rates of the last n days from data.fixer.io/api,  using a free account token access and stores the data in a mySQL data base created for this purpose
 
 ## Installation
 
-As for any other package, you can use `go get`:
+you can use `go get`:
 
 ```
-$ go get github.com/fadion/gofixerio
+$ go get github.com/JErBerlin/gofixerio
 ```
 
-For better package management however, I'd recommend [glide](https://github.com/Masterminds/glide) or the still in alpha [dep](https://github.com/golang/dep).
+## Preliminaries
 
-## Usage
+1. To use this application you must first create a (free) account at https://fixer.io
 
-First, let's import the package:
-
-```go
-import "github.com/fadion/gofixerio"
+2. The data base and the table must be created separately before hand using mySQL:	
+```
+    CREATE TABLE `fixio`.`rates` (
+  		`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  		`date` DATE NOT NULL,
+  		`target_currency` VARCHAR(3) NOT NULL DEFAULT 'USD',
+  		`price` FLOAT NOT NULL,
+  		PRIMARY KEY (`id`));
+```
+  	Optional to aviod duplicates (but then be aware of errors at inserting):
+```
+  	ALTER TABLE fixio.rates Add Unique `Unique` (date, target_currency);
 ```
 
-Let's see an exhaustive example with all the parameters:
+Be aware that you will have to provide later the username and pass for the database you created.
 
-```go
-exchange := fixerio.New()
+3. You have to manually hard code the access token of the fixerio API and also the user and pass for the data base (or -better- create environment variables for this purpose in your system and adapt the code).
 
-exchange.Base(fixerio.EUR.String())
-exchange.Symbols(fixerio.USD.String(), fixerio.AUD.String())
-exchange.Secure(true)
-exchange.Historical(time.Date(2016, time.December, 15, 0, 0, 0, 0, time.UTC))
+4. You can adjust the number of days of data (counting backwards from actual date) that will be retrieved. Take in account that the number of days correspond to the number of requests with the free account access, and they are limited to 1000 since the account creation.
 
-if rates, err := exchange.GetRates(); err == nil {
-    fmt.Println(rates[fixerio.USD.String()])
-}
-```
-
-Every parameter can be omitted as the package provides some sensible defaults. The base currency is `EUR`, makes a secure connection by default and returns all the supported currencies.
-
-## Response
-
-The response is a simple `map[string]float32` with currencies as keys and ratios as values. For a request like the following:
-
-```go
-exchange := fixerio.New()
-exchange.Symbols(fixerio.USD.String(), fixerio.GBP.String())
-
-rates, _ := exchange.GetRates()
-fmt.Println(rates)
-```
-
-the response will be the map:
-
-```go
-map[USD:1.1188 GBP:0.87093]
-```
-
-which you can access with the keys as strings or using the currency constants:
-
-```go
-rates["USD"];
-rates[fixerio.GBP.String()];
-```
