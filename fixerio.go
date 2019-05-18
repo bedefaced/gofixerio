@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"fixerio"
 	"net/http"
 	"strings"
 	"time"
@@ -14,6 +14,10 @@ import (
 	Package Fixerio provides a simple interface to the
 	fixer.io API, a service for currency exchange rates.
 */
+
+const (
+	baseURL = "data.fixer.io/api"
+)
 
 // Request Holds the request parameters.
 type Request struct {
@@ -35,50 +39,51 @@ type Response struct {
 	Error     apiError `json:"error"`
 }
 
+// rates is list of couples (currency, exchange_rate)
 type rates map[string]float32
+
 type apiError struct {
 	Code int    `json:"code"`
 	Type string `json:"type"`
 }
 
-// ClientResponse Response object returned by the service.
+// ClientResponse is the object returned by the service.
 type ClientResponse struct {
 	Date  time.Time
 	Base  string
 	Rates rates
 }
 
-const baseURL = "data.fixer.io/api"
-
-// New Initializes fixerio.
-func New() *Request {
+// NewRequest Initializes fixerio.
+func NewRequest() *Request {
 	return &Request{
 		httpClient: *http.DefaultClient,
-		base:       EUR.String(),
-		protocol:   "https",
+		base:       fixerio.EUR.String(),
+		protocol:   "http",
 		accessKey:  "",
 		date:       "",
 		symbols:    make([]string, 0),
 	}
 }
 
+// Client sets a custom http client
 func (f *Request) Client(httpClient *http.Client) {
 	if httpClient != nil {
 		f.httpClient = *httpClient
 	}
 }
 
-// AccessKey Sets access key.
+// AccessKey sets access key
 func (f *Request) AccessKey(accessKey string) {
 	f.accessKey = accessKey
 }
 
-// Sets base currency.
+// Base sets base currency
 func (f *Request) Base(currency string) {
 	f.base = currency
 }
 
-// Secure Make the connection secure or not by setting the secure argument to true or false.
+// Secure defines whether to make the connection secure
 func (f *Request) Secure(secure bool) {
 	if secure {
 		f.protocol = "https"
@@ -87,17 +92,17 @@ func (f *Request) Secure(secure bool) {
 	}
 }
 
-// Symbols List of currencies that should be returned.
+// Symbols contains the currencies that should be returned
 func (f *Request) Symbols(currencies ...string) {
 	f.symbols = currencies
 }
 
-// Historical Specify a date in the past to retrieve historical records.
+// Historical specifies a date from which to retrieve the records
 func (f *Request) Historical(date time.Time) {
 	f.date = date.Format("2006-01-02")
 }
 
-// GetRates Retrieve the exchange rates.
+// GetRates is the main function to retrieve the rates data
 func (f *Request) GetRates() (ClientResponse, error) {
 	url := f.GetURL()
 	response, err := f.makeRequest(url)
@@ -109,7 +114,8 @@ func (f *Request) GetRates() (ClientResponse, error) {
 	return response, nil
 }
 
-// GetURL Formats the URL correctly for the API Request.
+// GetURL constructs the url and insert parameters for the API request
+// example: https://data.fixer.io/api/2019-05-07?access_key=...
 func (f *Request) GetURL() string {
 	var url bytes.Buffer
 
@@ -145,15 +151,15 @@ func (f *Request) makeRequest(url string) (ClientResponse, error) {
 	body, err := f.httpClient.Get(url)
 
 	if err != nil {
-		return ClientResponse{}, errors.New("Couldn't connect to server")
+		return ClientResponse{}, errors.New("In making request: could not connect to server")
 	}
 
 	defer body.Body.Close()
 
 	err = json.NewDecoder(body.Body).Decode(&response)
 
-	if err != nil {
-		return ClientResponse{}, fmt.Errorf("Couldn't parse Response %v", err)
+	if err != nil || !response.Success {
+		return ClientResponse{}, errors.New("In making request: could not parse response or response was invalid")
 	}
 
 	var sResponse = ClientResponse{
