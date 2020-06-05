@@ -27,7 +27,9 @@ $ go get github.com/JErBerlin/gofixerio
   		`price` FLOAT NOT NULL,
   		PRIMARY KEY (`id`));
 ```
-  	Optional to aviod duplicates (but then be aware of errors at inserting):
+
+Optional to aviod duplicates (but then be aware of errors at inserting):
+
 ```
   	ALTER TABLE fixio.rates Add Unique `Unique` (date, target_currency);
 ```
