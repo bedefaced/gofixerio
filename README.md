@@ -1,6 +1,6 @@
 # Thin wrapper for Fixer.io
 
-This is repaired fork of JErBerlin/gofixerio, which based on fadion/gofixerio 
+This is repaired fork of [JErBerlin/gofixerio](https://github.com/JErBerlin/gofixerio), which based on [fadion/gofixerio](https://github.com/fadion/gofixerio).
 
 ## Installation
 
@@ -21,7 +21,7 @@ Let's see an exhaustive example with all the parameters:
 ```go
 exchange := fixerio.New()
 exchange.Secure(false)
-exchange.AccessKey(FixerKey)
+exchange.AccessKey(YOUR_API_KEY)
 exchange.Base(fixerio.USD) // comment line if your subscription plan at Fixer.io doesn't allow it
 exchange.Symbols(fixerio.GBP, fixerio.CNY)
 
@@ -38,9 +38,9 @@ The response is a `ClientResponse` structure:
 
 ```go
 type ClientResponse struct {
-	Date  time.Time
-	Base  string
-	Rates rates
+    Date  time.Time
+    Base  string
+    Rates rates
 } 
 ```
 
