@@ -1,42 +1,52 @@
-# Downlader of exchange rates from Fixer.io to a mySQL database
+# Thin wrapper for Fixer.io
 
-This is an example task for Data Engineers. Based on the (deprecated) library by Fadion
-```
-github.com/fadion/gofixerio/blob/master/fixerio.go
-```
-This program retrieves exchange rates of the last n days from data.fixer.io/api,  using a free account token access and stores the data in a mySQL data base created for this purpose
+This is repaired fork of JErBerlin/gofixerio, which based on fadion/gofixerio 
 
 ## Installation
 
-you can use `go get`:
-
 ```
-$ go get github.com/JErBerlin/gofixerio
+$ go get github.com/bedefaced/gofixerio
 ```
 
-## Preliminaries
+## Usage
 
-1. To use this application you must first create a (free) account at https://fixer.io
+First, let's import the package:
 
-2. The data base and the table must be created separately before hand using mySQL:	
-```
-    CREATE TABLE `fixio`.`rates` (
-  		`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  		`date` DATE NOT NULL,
-  		`target_currency` VARCHAR(3) NOT NULL DEFAULT 'USD',
-  		`price` FLOAT NOT NULL,
-  		PRIMARY KEY (`id`));
+```go
+import "github.com/bedefaced/gofixerio"
 ```
 
-Optional to aviod duplicates (but then be aware of errors at inserting):
+Let's see an exhaustive example with all the parameters:
 
+```go
+exchange := fixerio.New()
+exchange.Secure(false)
+exchange.AccessKey(FixerKey)
+exchange.Base(fixerio.USD) // comment line if your subscription plan at Fixer.io doesn't allow it
+exchange.Symbols(fixerio.GBP, fixerio.CNY)
+
+if response, err := exchange.GetRates(); err == nil {
+    fmt.Println(response.Rates[fixerio.CNY])
+}
 ```
-  	ALTER TABLE fixio.rates Add Unique `Unique` (date, target_currency);
+
+Every parameter can be omitted as the package provides some sensible defaults. The base currency is `EUR`, makes a secure connection by default and returns all the supported currencies.
+
+## Response
+
+The response is a `ClientResponse` structure:
+
+```go
+type ClientResponse struct {
+	Date  time.Time
+	Base  string
+	Rates rates
+} 
 ```
 
-Be aware that you will have to provide later the username and pass for the database you created.
+`Rates` is a `map[string]float32` with currencies as keys and ratios as values. You can access them with the keys as strings or using the currency constants:
 
-3. You have to manually hard code the access token of the fixerio API and also the user and pass for the data base (or -better- create environment variables for this purpose in your system and adapt the code).
-
-4. You can adjust the number of days of data (counting backwards from actual date) that will be retrieved. Take in account that the number of days correspond to the number of requests with the free account access, and they are limited to 1000 since the account creation.
-
+```go
+response.Rates["USD"];
+response.Rates[fixerio.GBP];
+```

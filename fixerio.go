@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fixerio"
 	"net/http"
 	"strings"
 	"time"
@@ -55,11 +54,11 @@ type ClientResponse struct {
 }
 
 // NewRequest Initializes fixerio.
-func NewRequest() *Request {
+func New() *Request {
 	return &Request{
 		httpClient: *http.DefaultClient,
-		base:       fixerio.EUR.String(),
-		protocol:   "http",
+		base:       EUR,
+		protocol:   "https",
 		accessKey:  "",
 		date:       "",
 		symbols:    make([]string, 0),

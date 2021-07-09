@@ -30,7 +30,7 @@ func TestBase(t *testing.T) {
 	expected := "https://" + baseURL + "/latest?base=USD"
 
 	f := New()
-	f.Base(USD.String())
+	f.Base(USD)
 	actual := f.GetURL()
 
 	if expected != actual {
@@ -42,8 +42,8 @@ func TestSymbols(t *testing.T) {
 	expected := "https://" + baseURL + "/latest?base=GBP&symbols=EUR,USD,AUD"
 
 	f := New()
-	f.Base(GBP.String())
-	f.Symbols(EUR.String(), USD.String(), AUD.String())
+	f.Base(GBP)
+	f.Symbols(EUR, USD, AUD)
 	actual := f.GetURL()
 
 	if expected != actual {
@@ -55,8 +55,8 @@ func TestSingleSymbol(t *testing.T) {
 	expected := "https://" + baseURL + "/latest?base=GBP&symbols=EUR"
 
 	f := New()
-	f.Base(GBP.String())
-	f.Symbols(EUR.String())
+	f.Base(GBP)
+	f.Symbols(EUR)
 	actual := f.GetURL()
 
 	if expected != actual {
@@ -92,8 +92,8 @@ func TestAllParameters(t *testing.T) {
 	expected := "http://" + baseURL + "/latest?base=USD&symbols=EUR,GBP"
 
 	f := New()
-	f.Base(USD.String())
-	f.Symbols(EUR.String(), GBP.String())
+	f.Base(USD)
+	f.Symbols(EUR, GBP)
 	f.Secure(false)
 	actual := f.GetURL()
 
